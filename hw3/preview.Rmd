@@ -1,0 +1,243 @@
+---
+title: "Exploratory data analysis"
+author: "Ivan Prodaiko"
+subtitle: Data visualization hw3
+output:
+  html_document:
+    df_print: paged
+  html_notebook: default
+  pdf_document: default
+---
+```{r}
+loadLibs <- function() {
+  library(dplyr)
+  library(tidyr)
+  library(ggplot2)
+  library(ggbeeswarm)
+  library(ggridges)
+  library(ggthemes)
+  library(ggrepel)
+  library(reshape2)
+  library(purrr)
+  library(Hmisc)
+}
+suppressMessages(loadLibs())
+
+remove_outliers <- function(x, na.rm = TRUE, ...) {
+  qnt <- quantile(x, probs=c(.05, .95), na.rm = na.rm, ...)
+  H <- 1.5 * IQR(x, na.rm = na.rm)
+  y <- x
+  y[x < (qnt[1] - H)] <- NA
+  y[x > (qnt[2] + H)] <- NA
+  y
+}
+```
+### Load dataset:
+```{r}
+df <- read.csv("./music.csv", header = T)
+head(df)
+```
+### Lets first of all look the distributions of main features:
+```{r}
+mainfeatures <- df %>% select(c("artist.hotttnesss", "duration", "tempo", "song.hotttnesss", "loudness", "familiarity"))
+
+as.data.frame(sapply(mainfeatures, remove_outliers)) %>% 
+  filter_at(vars(song.hotttnesss), any_vars(. != 0)) %>%
+  na.omit() %>%
+  gather() %>% 
+  ggplot(aes(value)) +
+  facet_wrap(~ key, scales = "free") +
+  geom_density() +
+  theme_fivethirtyeight() +
+  theme(
+    text = element_text(family = 'Ubuntu', size = 12)
+  ) +
+  labs(
+    title = "Destribution of main features",
+    caption = "Million songs dataset"
+  )
+```
+
+Several of tham are distributed almost normaly while some of tham are very skewed.
+
+### Lets check what mode is dominant in the dataset and how the mode slection impacts the popularity of the songs:
+```{r}
+df$modeString[df$mode==1] <- "Major"
+df$modeString[df$mode==0] <- "Minor"
+
+ggplot(df, aes(x=modeString)) +
+  geom_histogram(stat = "count", fill = "dark blue", alpha=0.4)+
+  theme_fivethirtyeight() +
+  theme(text = element_text(family = 'Ubuntu', size = 12)) +
+  labs(
+    title = "Modes count",
+    caption = "Million songs dataset"
+   )
+
+df %>% 
+  select(modeString, song.hotttnesss) %>% 
+  filter_at(vars(song.hotttnesss), any_vars(. != 0)) %>%
+  na.omit() %>% 
+  ggplot(aes(x=modeString, y=song.hotttnesss)) + 
+  geom_violin(alpha=.1, color='dark blue') + 
+  geom_jitter(shape=16, position=position_jitter(0.3), alpha = 0.15) +
+  geom_boxplot(width=0.1, color='dark red') +
+  coord_flip() +
+  theme_fivethirtyeight() +
+  theme(
+    text = element_text(family = 'Ubuntu', size = 12)
+  ) +
+  labs(
+    title = "Destribution of song hotness related to its mode",
+    caption = "Million songs dataset"
+  )
+```
+
+As we can conclude, we songs in **minor** is little bit **more popular**, than songs is **major**. But overall pattern is alomost identical.
+
+### Lets see how median song duration changed over time:
+```{r}
+dgr_fmt <- function(x) {
+  parse(text = sprintf("%.2f~minutes", x/60))
+}
+
+df2 <- df[df$year != 0,] %>% select(c("duration", "year"))
+
+aggregate(df2, by=list(df2$year), median) %>%
+  ggplot(aes(x=year)) +
+    geom_point(mapping = aes(y=duration), alpha = 0.8) +
+    geom_smooth(method = "gam", formula = y ~ s(x), mapping = aes(y=duration), se=F, color='darkred') +
+    theme_fivethirtyeight() +
+    theme(text = element_text(family = 'Ubuntu', size = 12)) +
+    scale_x_continuous(
+      breaks = seq(min(df2$year), max(df2$year), 10),
+      expand = c(0, 0, 0, 0),
+      minor_breaks = F
+    ) +
+    scale_y_continuous(
+      label = dgr_fmt
+    ) +
+    geom_curve(data = data.frame(x = 1986, y = 3 * 60, xend = 1965 + 1, yend = median(df2[df2$year == 1965,]$duration)),
+            aes(x = x, y = y, xend = xend, yend = yend),
+            curvature = -0.1,
+            arrow = arrow(angle = 15, length = unit(5, 'pt')),
+            inherit.aes = FALSE) +
+    geom_text(
+      data = data.frame(x = 1980, y = 3 * 60, label = '"The Beatles" rise\nRock-n-roll revolution'),
+      aes(x = x, y = y, label = label),
+      inherit.aes = FALSE, nudge_x = 16
+    ) +
+    geom_curve(data = data.frame(x = 1960, y = 4.17 * 60, xend = 1970, yend = median(df2[df2$year == 1970,]$duration)),
+            aes(x = x, y = y, xend = xend, yend = yend),
+            curvature = -0.1,
+            arrow = arrow(angle = 20, length = unit(5, 'pt')),
+            inherit.aes = FALSE) +
+    geom_text(
+      data = data.frame(x = 1960, y = 4.17 * 60, label = 'First "Black Subbuth" albom\nHeavy metal era started'),
+      aes(x = x, y = y, label = label),
+      inherit.aes = FALSE, nudge_x = -12
+    ) +
+    labs(
+      title = "Avarage song duration",
+      subtitle = "Changing over time",
+      caption = "Million songs dataset"
+    )
+```
+
+As we could see avarage duration of songs has songs tend to be **below 3 minutes** before **mid 60th**. After the rock-n-roll rise it become **approximately 4 minutes since than**.
+
+### Lets see how median song tempo changed over time:
+```{r}
+dgr_fmt <- function(x) {
+  parse(text = sprintf("%.2f~BPM", x))
+}
+
+df2 <- df[df$year != 0,] %>% select(c("tempo", "year"))
+
+aggregate(df2, by=list(df2$year), median) %>%
+  ggplot(aes(x=year)) +
+    geom_point(mapping = aes(y=tempo), alpha = 0.8) +
+    geom_smooth(method = "gam", formula = y ~ s(x), mapping = aes(y=tempo), se=F, color='darkred') +
+    theme_fivethirtyeight() +
+    theme(text = element_text(family = 'Ubuntu', size = 12)) +
+    scale_x_continuous(
+      breaks = seq(min(df2$year), max(df2$year), 10),
+      expand = c(0, 0, 0, 0),
+      minor_breaks = F
+    ) +
+    scale_y_continuous(
+      label = dgr_fmt
+    ) +
+    labs(
+      title = "Avarage song tempo",
+      subtitle = "Changing over time",
+      caption = "Million songs dataset"
+    )
+```
+
+Avarage tempo of songs has **started raising** from **mid 40th** and reached **120 BPM** and approximately stays on this level now.
+
+### Lets see how populer different genres of music are:
+```{r}
+genres <- as_data_frame(table(genre = df[df$terms != 'Not available',]$terms))
+genres[order(-genres$n), ] %>% slice(1:30) %>%
+  ggplot(aes(x=reorder(genre, n), y=n)) +
+  geom_bar(stat = "identity", fill = "dark blue", alpha=0.4)+
+  coord_flip()+
+  theme_fivethirtyeight() +
+  theme(text = element_text(family = 'Ubuntu', size = 12)) +
+  scale_y_continuous(breaks = NULL) +
+  labs(
+    title = "Most popular genres",
+    caption = "Million songs dataset"
+   )
+```
+
+As we could see **rock** and **hip-hop** are the most popular.
+
+### Lets where the artists are from:
+```{r}
+geo_available <- as_data_frame(table(location = df[df$location != 'Not available',]$location))
+geo_available <- geo_available[order(-geo_available$n), ]
+
+most_popular_location <-
+  geo_available[grep(",", geo_available$location),] %>% 
+  slice(1:30)
+
+most_popular_location %>% ggplot(aes(x=reorder(location, n), y=n)) +
+  geom_bar(stat = "identity", fill = "dark blue", alpha=0.4) +
+  coord_flip()+
+  theme_fivethirtyeight() +
+  theme(text = element_text(family = 'Ubuntu', size = 12)) +
+  scale_y_continuous(breaks = NULL) +
+  labs(
+    title = "Most popular locations",
+    caption = "Million songs dataset"
+   )
+```
+
+As we could see **UK** and **USA** creates the most popular music (according to this dataset)
+
+### Lets draw the distribution of songs over the worlds map:
+```{r}
+df3 <- df[df$location != 'Not available',]
+WorldData <- map_data('world')
+WorldData %>% filter(region != "Antarctica") -> WorldData
+WorldData <- fortify(WorldData)
+
+ggplot() + 
+  geom_map(data=WorldData, map=WorldData,
+    aes(x=long, y=lat, group=group, map_id=region),
+    fill="white", colour="#7f7f7f", size=0.5
+  ) +
+  geom_point(data = df3, aes(x = longitude, y = latitude), col="dark red", size=.5, alpha = .8) +
+  theme_fivethirtyeight() +
+  theme(text = element_text(family = 'Ubuntu', size = 12)) +
+  labs(
+    title = "Concentration of artists around on the worlds map",
+    caption = "Million songs dataset"
+   )
+```
+
+Most of the music are produced in **USA east coast** and **Western Europe** (according to dataset).
+

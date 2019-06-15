@@ -1,0 +1,658 @@
+\documentclass[]{article}
+\usepackage{lmodern}
+\usepackage{amssymb,amsmath}
+\usepackage{ifxetex,ifluatex}
+\usepackage{fixltx2e} % provides \textsubscript
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else % if luatex or xelatex
+  \ifxetex
+    \usepackage{mathspec}
+  \else
+    \usepackage{fontspec}
+  \fi
+  \defaultfontfeatures{Ligatures=TeX,Scale=MatchLowercase}
+\fi
+% use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+% use microtype if available
+\IfFileExists{microtype.sty}{%
+\usepackage{microtype}
+\UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\usepackage[margin=1in]{geometry}
+\usepackage{hyperref}
+\hypersetup{unicode=true,
+            pdftitle={DataViz Final Project},
+            pdfauthor={Ivan Prodaiko},
+            pdfborder={0 0 0},
+            breaklinks=true}
+\urlstyle{same}  % don't use monospace font for urls
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx,grffile}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+\IfFileExists{parskip.sty}{%
+\usepackage{parskip}
+}{% else
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt plus 2pt minus 1pt}
+}
+\setlength{\emergencystretch}{3em}  % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{0}
+% Redefines (sub)paragraphs to behave more like sections
+\ifx\paragraph\undefined\else
+\let\oldparagraph\paragraph
+\renewcommand{\paragraph}[1]{\oldparagraph{#1}\mbox{}}
+\fi
+\ifx\subparagraph\undefined\else
+\let\oldsubparagraph\subparagraph
+\renewcommand{\subparagraph}[1]{\oldsubparagraph{#1}\mbox{}}
+\fi
+
+%%% Use protect on footnotes to avoid problems with footnotes in titles
+\let\rmarkdownfootnote\footnote%
+\def\footnote{\protect\rmarkdownfootnote}
+
+%%% Change title format to be more compact
+\usepackage{titling}
+
+% Create subtitle command for use in maketitle
+\providecommand{\subtitle}[1]{
+  \posttitle{
+    \begin{center}\large#1\end{center}
+    }
+}
+
+\setlength{\droptitle}{-2em}
+
+  \title{DataViz Final Project}
+    \pretitle{\vspace{\droptitle}\centering\huge}
+  \posttitle{\par}
+  \subtitle{Aviation Accident Database}
+  \author{Ivan Prodaiko}
+    \preauthor{\centering\large\emph}
+  \postauthor{\par}
+    \date{}
+    \predate{}\postdate{}
+  
+
+\begin{document}
+\maketitle
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{f <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{() \{}
+  \KeywordTok{library}\NormalTok{(dplyr)}
+  \KeywordTok{library}\NormalTok{(tidyr)}
+  \KeywordTok{library}\NormalTok{(ggplot2)}
+  \KeywordTok{library}\NormalTok{(ggthemes)}
+  \KeywordTok{library}\NormalTok{(ggbeeswarm)}
+  \KeywordTok{library}\NormalTok{(ggridges)}
+  \KeywordTok{library}\NormalTok{(ggthemes)}
+  \KeywordTok{library}\NormalTok{(ggrepel)}
+  \KeywordTok{library}\NormalTok{(gganimate)}
+  \KeywordTok{library}\NormalTok{(data.table)}
+  \KeywordTok{library}\NormalTok{(ggmap)}
+  \KeywordTok{library}\NormalTok{(maps)}
+  \KeywordTok{library}\NormalTok{(plotly)}
+  \KeywordTok{library}\NormalTok{(usmap)}
+  \KeywordTok{library}\NormalTok{(animation)}
+  \KeywordTok{library}\NormalTok{(tibble)}
+  \KeywordTok{library}\NormalTok{(lubridate)}
+  \KeywordTok{library}\NormalTok{(DT)}
+  \KeywordTok{library}\NormalTok{(readr)}
+  \KeywordTok{library}\NormalTok{(gifski)}
+  \KeywordTok{library}\NormalTok{(viridis)}
+  \KeywordTok{library}\NormalTok{(stringr)}
+  \KeywordTok{library}\NormalTok{(geojsonio)}
+  \KeywordTok{library}\NormalTok{(rgeos)}
+\NormalTok{\}}
+\KeywordTok{suppressMessages}\NormalTok{(}\KeywordTok{f}\NormalTok{())}
+
+\KeywordTok{register_google}\NormalTok{(}\DataTypeTok{key =} \StringTok{"AIzaSyD-KlqQsDOruRxUVU-g1HfVyyX84Nu3004"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\hypertarget{load-dataset}{%
+\section{Load dataset}\label{load-dataset}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"AviationData.csv"}\NormalTok{)}
+\NormalTok{df <-}\StringTok{ }\NormalTok{df[df[}\StringTok{'Aircraft.Category'}\NormalTok{] }\OperatorTok{==}\StringTok{ 'Airplane'}\NormalTok{,] }\CommentTok{# do not take helicopters into account}
+\KeywordTok{head}\NormalTok{(df, }\DecValTok{20}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          Event.Id Investigation.Type Accident.Number Event.Date
+## 1  20181217X10943           Accident      GAA19CA098 2018-12-16
+## 2  20181217X25746           Accident      GAA19CA097 2018-12-15
+## 3  20181213X41114           Accident      ERA19LA065 2018-12-13
+## 4  20181213X45528           Accident      CEN19FA044 2018-12-13
+## 5  20181214X90303           Accident      GAA19CA096 2018-12-11
+## 6  20181210X21905           Accident      GAA19CA091 2018-12-10
+## 7  20181208X53536           Accident      GAA19CA090 2018-12-08
+## 8  20181206X45049           Accident      GAA19CA088 2018-12-05
+## 9  20181204X03049           Accident      GAA19CA086 2018-12-04
+## 10 20181212X01623           Accident      ERA19LA063 2018-12-04
+## 11 20181204X93009           Accident      GAA19CA087 2018-12-03
+## 12 20181204X05247           Accident      WPR19LA035 2018-12-02
+## 13 20181201X45922           Accident      ERA19FA060 2018-12-01
+## 14 20181130X14057           Accident      ERA19FA059 2018-11-30
+## 15 20181130X80724           Accident      CEN19LA039 2018-11-30
+## 16 20181130X31617           Accident      CEN19FA036 2018-11-30
+## 17 20181130X14309           Accident      WPR19WA033 2018-11-29
+## 18 20181129X63138           Accident      GAA19CA080 2018-11-29
+## 19 20181129X30228           Accident      ERA19LA057 2018-11-29
+## 20 20181129X70430           Accident      CEN19FA035 2018-11-29
+##                     Location       Country  Latitude  Longitude
+## 1             Grangville, ID United States  45.58361 -115.68167
+## 2               MORIARTY, NM United States  34.97000 -106.00000
+## 3            Punta Gorda, FL United States  26.92528  -82.00111
+## 4             Valparaiso, IN United States  41.45167  -87.00444
+## 5               Hartford, WI United States  43.33028  -88.32611
+## 6                Chester, CT United States        NA         NA
+## 7               Hesperia, CA United States  34.37694 -117.31611
+## 8               Cornelia, GA United States        NA         NA
+## 9                   Reno, NV United States  39.65889 -119.86583
+## 10                Moscow, PA United States  41.32695  -75.59111
+## 11                Monroe, NC United States  35.01750  -80.62194
+## 12            Santa Rita, GU United States        NA         NA
+## 13       Fort Lauderdale, FL United States  26.20500  -80.15722
+## 14          Apalachicola, FL United States  29.76361  -85.02250
+## 15                 Fargo, ND United States  46.92056  -96.81583
+## 16               Memphis, IN United States  38.47528  -85.81111
+## 17 Machadodorp, South Africa  South Africa -25.60778   30.51444
+## 18            Burlington, WA United States        NA         NA
+## 19              Kennesaw, GA United States  34.03944  -84.58583
+## 20                Marion, IN United States  40.48056  -85.68250
+##    Airport.Code                   Airport.Name Injury.Severity
+## 1           PVT                                      Non-Fatal
+## 2                                MORIARTY MUNI       Non-Fatal
+## 3           PGD                    Punta Gorda       Non-Fatal
+## 4           VPZ             Porter County Rgnl        Fatal(1)
+## 5           HXF                  Hartford Muni       Non-Fatal
+## 6           SNC                                    Unavailable
+## 7           L26                       HESPERIA       Non-Fatal
+## 8           AJR                                      Non-Fatal
+## 9           RTS                     RENO/STEAD       Non-Fatal
+## 10                                         N/A       Non-Fatal
+## 11          EQY     CHARLOTTE-MONROE EXECUTIVE       Non-Fatal
+## 12                                         N/A       Non-Fatal
+## 13          FXE Fort Lauderdale Executive Airp        Fatal(2)
+## 14          AAF          Apalachicola Regional        Fatal(1)
+## 15          FAR           Hector International       Non-Fatal
+## 16                                                    Fatal(3)
+## 17                                                   Non-Fatal
+## 18          BVS                                      Non-Fatal
+## 19          RYY Cobb County Intl-Mccollum Fiel       Non-Fatal
+## 20          MZZ       Marion Municipal Airport        Fatal(1)
+##    Aircraft.Damage Aircraft.Category Registration.Number
+## 1      Substantial          Airplane              N4385B
+## 2      Substantial          Airplane               N188H
+## 3      Substantial          Airplane              N145MM
+## 4        Destroyed          Airplane              N6785P
+## 5      Substantial          Airplane              N6650M
+## 6      Substantial          Airplane              N143GW
+## 7      Substantial          Airplane              N947DS
+## 8      Substantial          Airplane              N839AL
+## 9      Substantial          Airplane              N9003M
+## 10     Substantial          Airplane               N618G
+## 11     Substantial          Airplane              N65773
+## 12     Substantial          Airplane              N98884
+## 13       Destroyed          Airplane               N79HP
+## 14       Destroyed          Airplane              N3995Y
+## 15     Substantial          Airplane              N941JM
+## 16       Destroyed          Airplane              N525EG
+## 17     Substantial          Airplane                    
+## 18     Substantial          Airplane              N3619M
+## 19     Substantial          Airplane              N597CP
+## 20       Destroyed          Airplane              N7751Y
+##                       Make         Model Amateur.Built Number.of.Engines
+## 1                   Cessna           170            No                 1
+## 2                   Cessna           180            No                 1
+## 3  CZECH SPORT AIRCRAFT AS   Piper Sport            No                 1
+## 4                    Piper          PA24            No                 1
+## 5                    Beech            36            No                 1
+## 6                     Zlin          Z143            No                NA
+## 7                   Zenair CH 750 CRUZER           Yes                NA
+## 8                    Piper          PA28            No                 1
+## 9                   Cessna           182            No                 1
+## 10                 Lancair          LC41            No                 1
+## 11                  Cessna           172            No                 1
+## 12                  Cessna          172P            No                 1
+## 13                  Cessna           335            No                 2
+## 14                  Cessna           210            No                 1
+## 15                  Cessna           550            No                 2
+## 16                  Cessna           525            No                NA
+## 17                  Cessna          U206            No                NA
+## 18                   Piper         PA 12            No                 1
+## 19                  Cirrus          SR22            No                 1
+## 20                   Piper         PA 30            No                 2
+##      Engine.Type           FAR.Description Schedule Purpose.of.Flight
+## 1                Part 91: General Aviation                Positioning
+## 2                Part 91: General Aviation                   Personal
+## 3  Reciprocating Part 91: General Aviation                   Personal
+## 4  Reciprocating Part 91: General Aviation                   Personal
+## 5                Part 91: General Aviation                   Personal
+## 6                Part 91: General Aviation                           
+## 7                Part 91: General Aviation                   Personal
+## 8                Part 91: General Aviation              Instructional
+## 9                Part 91: General Aviation                           
+## 10 Reciprocating Part 91: General Aviation                   Personal
+## 11               Part 91: General Aviation                   Personal
+## 12 Reciprocating Part 91: General Aviation                   Personal
+## 13 Reciprocating Part 91: General Aviation                   Personal
+## 14 Reciprocating Part 91: General Aviation                   Personal
+## 15     Turbo Jet Part 91: General Aviation                   Business
+## 16               Part 91: General Aviation                   Business
+## 17                Non-U.S., Non-Commercial                           
+## 18               Part 91: General Aviation                   Personal
+## 19 Reciprocating Part 91: General Aviation                   Personal
+## 20 Reciprocating Part 91: General Aviation                   Personal
+##    Air.Carrier Total.Fatal.Injuries Total.Serious.Injuries
+## 1                                NA                     NA
+## 2                                NA                     NA
+## 3                                NA                     NA
+## 4                                 1                     NA
+## 5                                NA                     NA
+## 6                                NA                     NA
+## 7                                NA                     NA
+## 8                                NA                     NA
+## 9                                NA                     NA
+## 10                               NA                     NA
+## 11                               NA                     NA
+## 12                               NA                     NA
+## 13                                2                     NA
+## 14                                1                     NA
+## 15                               NA                     NA
+## 16                                3                     NA
+## 17                               NA                      5
+## 18                               NA                     NA
+## 19                               NA                     NA
+## 20                                1                     NA
+##    Total.Minor.Injuries Total.Uninjured Weather.Condition
+## 1                    NA               1                  
+## 2                    NA               1               VMC
+## 3                     1              NA               VMC
+## 4                    NA              NA               VMC
+## 5                    NA               1               VMC
+## 6                    NA              NA                  
+## 7                    NA               1               VMC
+## 8                    NA               2                  
+## 9                    NA               2               IMC
+## 10                   NA               1               VMC
+## 11                   NA               1               VMC
+## 12                    2              NA               VMC
+## 13                    1              NA               VMC
+## 14                   NA              NA               VMC
+## 15                    9               2               IMC
+## 16                   NA              NA               VMC
+## 17                   NA              NA                  
+## 18                   NA               1                  
+## 19                    2              NA               VMC
+## 20                   NA              NA               VMC
+##    Broad.Phase.of.Flight Report.Status Publication.Date
+## 1                          Preliminary       2018-12-18
+## 2                          Preliminary       2018-12-20
+## 3               APPROACH   Preliminary       2018-12-21
+## 4                TAKEOFF   Preliminary       2018-12-19
+## 5                          Preliminary       2018-12-18
+## 6                          Preliminary       2018-12-13
+## 7                          Preliminary       2018-12-13
+## 8                          Preliminary       2018-12-13
+## 9                          Preliminary       2018-12-20
+## 10                CRUISE   Preliminary       2018-12-19
+## 11                         Preliminary       2018-12-07
+## 12                         Preliminary       2018-12-11
+## 13               TAKEOFF   Preliminary       2018-12-17
+## 14               TAKEOFF   Preliminary       2018-12-11
+## 15               LANDING   Preliminary       2018-12-17
+## 16               TAKEOFF   Preliminary       2018-12-13
+## 17                CRUISE       Foreign                 
+## 18                         Preliminary       2018-12-13
+## 19                CRUISE   Preliminary       2018-12-11
+## 20               TAKEOFF   Preliminary       2018-12-10
+\end{verbatim}
+
+\hypertarget{first-things-first.-lets-do-some-exploratory-anslysis.}{%
+\section{First things first. Lets do some exploratory
+anslysis.}\label{first-things-first.-lets-do-some-exploratory-anslysis.}}
+
+\hypertarget{what-types-of-events-do-we-have-in-the-dataset.}{%
+\subsubsection{What types of events do we have in the
+dataset.}\label{what-types-of-events-do-we-have-in-the-dataset.}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{tmp <-}\StringTok{ }\NormalTok{df }\OperatorTok{%>%}\StringTok{ }\KeywordTok{group_by}\NormalTok{(Investigation.Type) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{count}\NormalTok{()}
+\NormalTok{tmp <-}\StringTok{ }\NormalTok{tmp[tmp}\OperatorTok{$}\NormalTok{n }\OperatorTok{>}\StringTok{ }\DecValTok{1}\NormalTok{,]}
+
+\NormalTok{tmp }\OperatorTok{%>%}
+\StringTok{  }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{Investigation.Type, }\DataTypeTok{y=}\NormalTok{n)) }\OperatorTok{+}\StringTok{ }
+\StringTok{  }\KeywordTok{geom_bar}\NormalTok{(}\DataTypeTok{stat=}\StringTok{"identity"}\NormalTok{, }\DataTypeTok{width=}\NormalTok{.}\DecValTok{5}\NormalTok{, }\DataTypeTok{fill =} \StringTok{"dark blue"}\NormalTok{, }\DataTypeTok{alpha=}\NormalTok{.}\DecValTok{5}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme_fivethirtyeight}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}
+    \DataTypeTok{title =} \StringTok{"Types of events by number"}\NormalTok{,}
+    \DataTypeTok{caption =} \StringTok{"https://www.kaggle.com/khsamaha/aviation-accident-database-synopses"}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{final_files/figure-latex/unnamed-chunk-3-1.pdf} \#\#\#
+Lets find out what does this actually mean:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{ACCIDENT} An occurrence associated with the operation of an
+  aircraft which takes place between the time any person boards the
+  aircraft with the intention of flight until such time as all such
+  persons have disembarked, in which:
+
+  \begin{enumerate}
+  \def\labelenumi{\alph{enumi})}
+  \tightlist
+  \item
+    \textbf{a person is fatally or seriously injured} as a result of:
+    --- being in the aircraft, or --- direct contact with any part of
+    the aircraft, including parts which have become detached from the
+    aircraft, or --- direct exposure to jet blast, except when the
+    injuries are from natural causes, self-inflicted or inflicted by
+    other persons, or when the injuries are to stowaways hiding outside
+    the areas normally available to the passengers and crew.
+  \item
+    \textbf{the aircraft sustains damage or structural failure} which:
+    --- adversely affects the structural strength, performance or flight
+    characteristics of the aircraft, and --- would normally require
+    major repair or replacement of the affected component, except for
+    engine failure or damage, when the damage is limited to the engine,
+    its cowlings or accessories; or for damage limited to propellers,
+    wing tips, antennas, tires, brakes, fairings, small dents or
+    puncture holes in the aircraft skin.
+  \item
+    \textbf{the aircraft is missing or is completely inaccessible}.
+  \end{enumerate}
+\item
+  \textbf{INCIDENT} An occurrence, other than an accident, associated
+  with the operation of an aircraft which affects or could affect the
+  safety of operation.
+\end{itemize}
+
+\hypertarget{some-info-about-flights-we-will-not-consider-the-data-that-has-less-than-.25-of-total}{%
+\subsubsection{Some info about flights (we will not consider the data
+that has less than .25\% of
+total)}\label{some-info-about-flights-we-will-not-consider-the-data-that-has-less-than-.25-of-total}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{drawBarChart <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(data, column, title) \{}
+\NormalTok{  one_persent =}\StringTok{ }\KeywordTok{sum}\NormalTok{(data[}\StringTok{"n"}\NormalTok{]) }\OperatorTok{/}\StringTok{ }\DecValTok{100}
+\NormalTok{  data[data[column] }\OperatorTok{!=}\StringTok{ ""}\NormalTok{,] }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(n }\OperatorTok{>}\StringTok{ }\KeywordTok{sum}\NormalTok{(data[}\StringTok{"n"}\NormalTok{], }\DataTypeTok{na.rm =} \OtherTok{TRUE}\NormalTok{) }\OperatorTok{/}\StringTok{ }\DecValTok{400}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes_string}\NormalTok{(}\DataTypeTok{x=}\NormalTok{column, }\DataTypeTok{y=}\StringTok{"n"}\NormalTok{)) }\OperatorTok{+}
+\StringTok{      }\KeywordTok{geom_bar}\NormalTok{(}\DataTypeTok{stat=}\StringTok{"identity"}\NormalTok{, }\DataTypeTok{width=}\NormalTok{.}\DecValTok{5}\NormalTok{, }\DataTypeTok{fill =} \StringTok{"dark blue"}\NormalTok{, }\DataTypeTok{alpha=}\NormalTok{.}\DecValTok{5}\NormalTok{) }\OperatorTok{+}
+\StringTok{      }\KeywordTok{theme_fivethirtyeight}\NormalTok{() }\OperatorTok{+}
+\StringTok{      }\KeywordTok{coord_flip}\NormalTok{() }\OperatorTok{+}
+\StringTok{      }\KeywordTok{labs}\NormalTok{(}
+        \DataTypeTok{title =}\NormalTok{ title,}
+        \DataTypeTok{caption =} \StringTok{"https://www.kaggle.com/khsamaha/aviation-accident-database-synopses"}
+\NormalTok{      )}
+\NormalTok{\}}
+
+\NormalTok{df }\OperatorTok{%>%}\StringTok{ }\KeywordTok{group_by}\NormalTok{(Aircraft.Damage) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{count}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }\KeywordTok{drawBarChart}\NormalTok{(}\StringTok{"Aircraft.Damage"}\NormalTok{, }\StringTok{"Aircraft damage"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{final_files/figure-latex/unnamed-chunk-4-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OperatorTok{%>%}\StringTok{ }\KeywordTok{group_by}\NormalTok{(Engine.Type) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{count}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }\KeywordTok{drawBarChart}\NormalTok{(}\StringTok{"Engine.Type"}\NormalTok{, }\StringTok{"Engine type"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{final_files/figure-latex/unnamed-chunk-4-2.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OperatorTok{%>%}\StringTok{ }\KeywordTok{group_by}\NormalTok{(Number.of.Engines) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{count}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }\KeywordTok{drawBarChart}\NormalTok{(}\StringTok{"Number.of.Engines"}\NormalTok{, }\StringTok{"Number of Engines"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{final_files/figure-latex/unnamed-chunk-4-3.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OperatorTok{%>%}\StringTok{ }\KeywordTok{group_by}\NormalTok{(Broad.Phase.of.Flight) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{count}\NormalTok{() }\OperatorTok{%>%}\StringTok{ }\KeywordTok{drawBarChart}\NormalTok{(}\StringTok{"Broad.Phase.of.Flight"}\NormalTok{, }\StringTok{"Broad Phase of Flight"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{final_files/figure-latex/unnamed-chunk-4-4.pdf}
+
+\hypertarget{lets-make-some-conclusions-considering-these-data}{%
+\subsubsection{Lets make some conclusions considering these
+data:}\label{lets-make-some-conclusions-considering-these-data}}
+
+\begin{itemize}
+\tightlist
+\item
+  if aircraft got damage it is usually end up being substantially
+  damaged or event destroyed.
+\item
+  big part of events happened to \textbf{reciprocating} engines that do
+  not used in civil aviation.
+\item
+  significant part of events happened to aircrafts that has \textbf{only
+  one} engine. No aircraft is allowed to be used in civil aviation with
+  one engine. The only exception is AN-2 which has a biplan wing
+  construction.
+\item
+  large amount of events broke out on the ground.
+\end{itemize}
+
+\hypertarget{lets-see-what-airports-should-be-considered-the-most-dangourous-in-absolute-value}{%
+\subsubsection{Lets see what airports should be considered the most
+dangourous (in absolute
+value)}\label{lets-see-what-airports-should-be-considered-the-most-dangourous-in-absolute-value}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{mostDengerousAirportsChart <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(df) \{}
+\NormalTok{  df2 <-}\StringTok{ }\KeywordTok{select}\NormalTok{(}\KeywordTok{copy}\NormalTok{(df), Airport.Code) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{na.omit}\NormalTok{()}
+\NormalTok{  df2 <-}\StringTok{ }\NormalTok{df2 }\OperatorTok{%>%}\StringTok{ }\KeywordTok{group_by}\NormalTok{(Airport.Code) }\OperatorTok{%>%}\StringTok{ }\NormalTok{count }\OperatorTok{%>%}\StringTok{ }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(n)) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(Airport.Code }\OperatorTok{!=}\StringTok{ ""} \OperatorTok{&&}\StringTok{ }\NormalTok{Airport.Code }\OperatorTok{!=}\StringTok{ "NONE"} \OperatorTok{&&}\StringTok{ }\NormalTok{Airport.Code }\OperatorTok{!=}\StringTok{ "N/A"} \OperatorTok{&&}\StringTok{ }\NormalTok{Airport.Code }\OperatorTok{!=}\StringTok{ "None"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{head}\NormalTok{(}\DecValTok{20}\NormalTok{)}
+\NormalTok{  df2 }\OperatorTok{%>%}\StringTok{ }\KeywordTok{ggplot}\NormalTok{(}\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\KeywordTok{reorder}\NormalTok{(Airport.Code, n), }\DataTypeTok{y=}\NormalTok{n)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_bar}\NormalTok{(}\DataTypeTok{stat =} \StringTok{"identity"}\NormalTok{, }\DataTypeTok{fill =} \StringTok{"dark blue"}\NormalTok{, }\DataTypeTok{alpha=}\FloatTok{0.4}\NormalTok{)}\OperatorTok{+}
+\StringTok{    }\KeywordTok{coord_flip}\NormalTok{()}\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_fivethirtyeight}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}
+      \DataTypeTok{title =} \StringTok{"Most dangerous airports"}\NormalTok{, }\DataTypeTok{ylab =} \StringTok{"Airport code"}\NormalTok{, }\DataTypeTok{xlab =} \StringTok{"Number of events"}\NormalTok{,}
+      \DataTypeTok{caption =} \StringTok{"https://www.kaggle.com/khsamaha/aviation-accident-database-synopses"}
+\NormalTok{    )}
+\NormalTok{\}}
+
+\KeywordTok{mostDengerousAirportsChart}\NormalTok{(df)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{final_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+\hypertarget{contnuing-this-topic-lets-see-where-these-events-have-occured}{%
+\subsubsection{Contnuing this topic lets see where these events have
+occured:}\label{contnuing-this-topic-lets-see-where-these-events-have-occured}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{WorldData <-}\StringTok{ }\KeywordTok{map_data}\NormalTok{(}\StringTok{'world'}\NormalTok{)}
+\NormalTok{WorldData }\OperatorTok{%>%}\StringTok{ }\KeywordTok{filter}\NormalTok{(region }\OperatorTok{!=}\StringTok{ "Antarctica"}\NormalTok{) ->}\StringTok{ }\NormalTok{WorldData}
+\NormalTok{WorldData <-}\StringTok{ }\KeywordTok{fortify}\NormalTok{(WorldData)}
+
+\NormalTok{worldMapChart <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(df, mapData) \{}
+  \KeywordTok{ggplot}\NormalTok{() }\OperatorTok{+}\StringTok{ }
+\StringTok{    }\KeywordTok{geom_map}\NormalTok{(}\DataTypeTok{data=}\NormalTok{mapData, }\DataTypeTok{map=}\NormalTok{mapData,}
+      \KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{long, }\DataTypeTok{y=}\NormalTok{lat, }\DataTypeTok{group=}\NormalTok{group, }\DataTypeTok{map_id=}\NormalTok{region),}
+      \DataTypeTok{fill=}\StringTok{"white"}\NormalTok{, }\DataTypeTok{colour=}\StringTok{"#7f7f7f"}\NormalTok{, }\DataTypeTok{size=}\FloatTok{0.5}
+\NormalTok{    ) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ df[df}\OperatorTok{$}\NormalTok{Investigation.Type }\OperatorTok{==}\StringTok{ "Accident"}\NormalTok{,], }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ Longitude, }\DataTypeTok{y =}\NormalTok{ Latitude), }\DataTypeTok{colour=}\StringTok{"dark red"}\NormalTok{, }\DataTypeTok{size=}\NormalTok{.}\DecValTok{5}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{.4}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{geom_point}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ df[df}\OperatorTok{$}\NormalTok{Investigation.Type }\OperatorTok{==}\StringTok{ "Incident"}\NormalTok{,], }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x =}\NormalTok{ Longitude, }\DataTypeTok{y =}\NormalTok{ Latitude), }\DataTypeTok{colour=}\StringTok{"dark blue"}\NormalTok{, }\DataTypeTok{size=}\NormalTok{.}\DecValTok{5}\NormalTok{, }\DataTypeTok{alpha =} \FloatTok{.8}\NormalTok{) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{scale_colour_manual}\NormalTok{(}\DataTypeTok{values =} \KeywordTok{c}\NormalTok{(}\StringTok{"Accident"}\NormalTok{, }\StringTok{"Incident"}\NormalTok{),}
+                        \DataTypeTok{labels =} \KeywordTok{c}\NormalTok{(}\StringTok{"Accident"}\NormalTok{=}\StringTok{"dark red"}\NormalTok{, }\StringTok{"Incident"}\NormalTok{=}\StringTok{"dark blue"}\NormalTok{)) }\OperatorTok{+}
+\StringTok{    }\KeywordTok{theme_fivethirtyeight}\NormalTok{() }\OperatorTok{+}
+\StringTok{    }\KeywordTok{labs}\NormalTok{(}
+      \DataTypeTok{title =} \StringTok{"Aviation events on world map"}\NormalTok{,}
+      \DataTypeTok{caption =} \StringTok{"https://www.kaggle.com/khsamaha/aviation-accident-database-synopses"}
+\NormalTok{     )}
+\NormalTok{\}}
+
+\KeywordTok{worldMapChart}\NormalTok{(df, WorldData)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Warning: Ignoring unknown aesthetics: x, y
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: Removed 4351 rows containing missing values (geom_point).
+\end{verbatim}
+
+\begin{verbatim}
+## Warning: Removed 761 rows containing missing values (geom_point).
+\end{verbatim}
+
+\includegraphics{final_files/figure-latex/unnamed-chunk-6-1.pdf} \#\#\#
+Lets see how many of events happens in different states. As far as
+dataset contain mostly United States info, than we would be use only
+this data.
+
+Data preprocessing. We need two additional files: - Abriviation of US
+states to their actuial names. - Geojson with hex data for maps.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{eventsByState <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(df) \{}
+\NormalTok{  states <-}\StringTok{ }\KeywordTok{read.csv}\NormalTok{(}\StringTok{"statelatlong.csv"}\NormalTok{) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{region =} \KeywordTok{tolower}\NormalTok{(City))}
+\NormalTok{  df}\OperatorTok{$}\NormalTok{Location =}\StringTok{ }\KeywordTok{str_sub}\NormalTok{(df}\OperatorTok{$}\NormalTok{Location,}\OperatorTok{-}\DecValTok{2}\NormalTok{,}\OperatorTok{-}\DecValTok{1}\NormalTok{)}
+\NormalTok{  df <-}\StringTok{ }\NormalTok{df[df}\OperatorTok{$}\NormalTok{Country }\OperatorTok{==}\StringTok{ "United States"}\NormalTok{,] }\OperatorTok{%>%}\StringTok{ }
+\StringTok{    }\KeywordTok{group_by}\NormalTok{(Location) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{    }\NormalTok{count }\OperatorTok{%>%}\StringTok{ }
+\StringTok{    }\KeywordTok{arrange}\NormalTok{(}\KeywordTok{desc}\NormalTok{(n)) }\OperatorTok{%>%}\StringTok{ }
+\StringTok{    }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{State =}\NormalTok{ Location) }\OperatorTok{%>%}\StringTok{ }\KeywordTok{mutate}\NormalTok{(}\DataTypeTok{Count =}\NormalTok{ n)}
+\NormalTok{  df}\OperatorTok{$}\NormalTok{bin =}\StringTok{ }\KeywordTok{cut}\NormalTok{(df}\OperatorTok{$}\NormalTok{n, }\DataTypeTok{breaks=}\KeywordTok{c}\NormalTok{(}\KeywordTok{seq}\NormalTok{(}\DecValTok{1}\NormalTok{, }\DecValTok{2000}\NormalTok{, }\DecValTok{100}\NormalTok{), }\OtherTok{Inf}\NormalTok{), }\DataTypeTok{labels =} \KeywordTok{c}\NormalTok{(}
+    \StringTok{"0-100"}\NormalTok{,}\StringTok{"100-200"}\NormalTok{,}\StringTok{"200-300"}\NormalTok{,}\StringTok{"300-400"}\NormalTok{,}\StringTok{"400-500"}\NormalTok{,}
+    \StringTok{"500-600"}\NormalTok{,}\StringTok{"600-700"}\NormalTok{,}\StringTok{"700-800"}\NormalTok{,}\StringTok{"800-900"}\NormalTok{,}\StringTok{"900-1000"}\NormalTok{,}
+    \StringTok{"1000-1100"}\NormalTok{,}\StringTok{"1100-1200"}\NormalTok{,}\StringTok{"1200-1300"}\NormalTok{,}\StringTok{"1300-1400"}\NormalTok{,}\StringTok{"1400-1500"}\NormalTok{,}
+    \StringTok{"1500-1600"}\NormalTok{,}\StringTok{"1600-1700"}\NormalTok{,}\StringTok{"1700-1800"}\NormalTok{,}\StringTok{"1800-1900"}\NormalTok{,}\StringTok{"1900-2000"}
+\NormalTok{  ), }\DataTypeTok{include.lowest =} \OtherTok{TRUE}\NormalTok{)}
+\NormalTok{  total <-}\StringTok{ }\KeywordTok{merge}\NormalTok{(df, states, }\DataTypeTok{by=}\StringTok{"State"}\NormalTok{)}
+\NormalTok{  total <-}\StringTok{ }\NormalTok{total[, }\OperatorTok{!}\NormalTok{(}\KeywordTok{names}\NormalTok{(total) }\OperatorTok{%in%}\StringTok{ }\KeywordTok{c}\NormalTok{(}\StringTok{"Location"}\NormalTok{,}\StringTok{"n"}\NormalTok{, }\StringTok{"City"}\NormalTok{))]}
+  \KeywordTok{return}\NormalTok{ (total)}
+\NormalTok{\}}
+
+\NormalTok{hexBinMap <-}\StringTok{ }\ControlFlowTok{function}\NormalTok{(geojson) \{}
+\NormalTok{  spdf_fortified <-}\StringTok{ }\KeywordTok{fortify}\NormalTok{(geojson, }\DataTypeTok{region =} \StringTok{"google_name"}\NormalTok{)}
+\NormalTok{  spdf_fortified}\OperatorTok{$}\NormalTok{id =}\StringTok{ }\KeywordTok{tolower}\NormalTok{(spdf_fortified}\OperatorTok{$}\NormalTok{id)}
+  \KeywordTok{return}\NormalTok{ (spdf_fortified)}
+\NormalTok{\}}
+
+\NormalTok{hexbin <-}\StringTok{ }\KeywordTok{geojson_read}\NormalTok{(}\StringTok{"us_states_hexgrid.geojson"}\NormalTok{,  }\DataTypeTok{what =} \StringTok{"sp"}\NormalTok{)}
+\NormalTok{centers <-}\StringTok{ }\KeywordTok{cbind.data.frame}\NormalTok{(}\KeywordTok{data.frame}\NormalTok{(}\KeywordTok{gCentroid}\NormalTok{(hexbin, }\DataTypeTok{byid=}\OtherTok{TRUE}\NormalTok{), }\DataTypeTok{id=}\NormalTok{hexbin}\OperatorTok{@}\NormalTok{data}\OperatorTok{$}\NormalTok{iso3166_}\DecValTok{2}\NormalTok{))}
+\NormalTok{merged <-}\StringTok{ }\KeywordTok{merge}\NormalTok{(}\KeywordTok{hexBinMap}\NormalTok{(hexbin), }\KeywordTok{eventsByState}\NormalTok{(}\KeywordTok{copy}\NormalTok{(df)), }\DataTypeTok{by.x=}\StringTok{"id"}\NormalTok{, }\DataTypeTok{by.y=}\StringTok{"region"}\NormalTok{, }\DataTypeTok{all.x=}\OtherTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+Plotting.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\KeywordTok{ggplot}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_polygon}\NormalTok{(}\DataTypeTok{data =}\NormalTok{ merged, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{fill =}\NormalTok{ bin, }\DataTypeTok{x =}\NormalTok{ long, }\DataTypeTok{y =}\NormalTok{ lat, }\DataTypeTok{group =}\NormalTok{ group) , }\DataTypeTok{size=}\DecValTok{0}\NormalTok{, }\DataTypeTok{alpha=}\FloatTok{0.9}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme_void}\NormalTok{() }\OperatorTok{+}
+\StringTok{  }\KeywordTok{geom_text}\NormalTok{(}\DataTypeTok{data=}\NormalTok{centers, }\KeywordTok{aes}\NormalTok{(}\DataTypeTok{x=}\NormalTok{x, }\DataTypeTok{y=}\NormalTok{y, }\DataTypeTok{label=}\NormalTok{id), }\DataTypeTok{color=}\StringTok{"black"}\NormalTok{, }\DataTypeTok{size=}\DecValTok{3}\NormalTok{, }\DataTypeTok{alpha=}\FloatTok{0.6}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{scale_fill_manual}\NormalTok{(}
+    \DataTypeTok{values=}\KeywordTok{rev}\NormalTok{(}\KeywordTok{magma}\NormalTok{(}\DecValTok{20}\NormalTok{)),}
+    \DataTypeTok{name=}\StringTok{"Number of events"}\NormalTok{,}
+    \DataTypeTok{guide =} \KeywordTok{guide_legend}\NormalTok{(}
+      \DataTypeTok{keyheight =} \KeywordTok{unit}\NormalTok{(}\DecValTok{3}\NormalTok{, }\DataTypeTok{units =} \StringTok{"mm"}\NormalTok{),}
+      \DataTypeTok{keywidth =} \KeywordTok{unit}\NormalTok{(}\DecValTok{12}\NormalTok{, }\DataTypeTok{units =} \StringTok{"mm"}\NormalTok{),}
+      \DataTypeTok{label.position =} \StringTok{"left"}\NormalTok{, }\DataTypeTok{title.position =} \StringTok{'top'}
+\NormalTok{    )}
+\NormalTok{  ) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{labs}\NormalTok{(}\DataTypeTok{title =} \StringTok{"Aviation events in US from 1962 to 2018 by state"}\NormalTok{) }\OperatorTok{+}
+\StringTok{  }\KeywordTok{theme}\NormalTok{(}
+    \DataTypeTok{text =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{color =} \StringTok{"#22211d"}\NormalTok{),}
+    \DataTypeTok{plot.title =} \KeywordTok{element_text}\NormalTok{(}\DataTypeTok{size=} \DecValTok{22}\NormalTok{, }\DataTypeTok{hjust=}\OperatorTok{-}\NormalTok{.}\DecValTok{5}\NormalTok{, }\DataTypeTok{color =} \StringTok{"#4e4d47"}\NormalTok{, }\DataTypeTok{margin =} \KeywordTok{margin}\NormalTok{(}\DataTypeTok{b =} \FloatTok{-0.1}\NormalTok{, }\DataTypeTok{t =} \FloatTok{0.4}\NormalTok{, }\DataTypeTok{l =} \DecValTok{2}\NormalTok{, }\DataTypeTok{unit =} \StringTok{"cm"}\NormalTok{))}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{final_files/figure-latex/unnamed-chunk-8-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{# tx <- map_data('world')}
+\CommentTok{# df2 <- df %>% mutate(time = ymd(format(Event.Date, format="%y")))}
+\CommentTok{# anim <- ggplot(tx, aes(long, lat)) +}
+\CommentTok{#   geom_polygon(aes(group = group), colour = "white", size=.05) +}
+\CommentTok{#   geom_point(data = df2, aes(x = Longitude, y = Latitude, color = Total.Fatal.Injuries), colour = "red") +}
+\CommentTok{#   scale_color_continuous(name = "Fatal",low = "yellow", high = "red") +}
+\CommentTok{#   labs(title = "Total Fatal Injuries and Locations",}
+\CommentTok{#       # subtitle = "Time:\{frame_time\}",}
+\CommentTok{#       x = "Long", y = "Lat") +}
+\CommentTok{#   theme_fivethirtyeight() +}
+\CommentTok{#   transition_reveal(time)}
+\CommentTok{# }
+\CommentTok{# animate(anim)}
+\end{Highlighting}
+\end{Shaded}
+
+
+\end{document}

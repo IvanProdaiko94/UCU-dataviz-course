@@ -1,0 +1,243 @@
+---
+title: "DataViz Final Project"
+author: "Ivan Prodaiko"
+subtitle: Aviation Accident Database
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+```{r}
+f <- function() {
+  library(dplyr)
+  library(tidyr)
+  library(ggplot2)
+  library(ggthemes)
+  library(ggbeeswarm)
+  library(ggridges)
+  library(ggthemes)
+  library(ggrepel)
+  library(gganimate)
+  library(data.table)
+  library(ggmap)
+  library(maps)
+  library(plotly)
+  library(usmap)
+  library(animation)
+  library(tibble)
+  library(lubridate)
+  library(DT)
+  library(readr)
+  library(gifski)
+  library(viridis)
+  library(stringr)
+  library(geojsonio)
+  library(rgeos)
+}
+suppressMessages(f())
+
+register_google(key = "AIzaSyD-KlqQsDOruRxUVU-g1HfVyyX84Nu3004")
+```
+# Load dataset
+```{r}
+df <- read.csv("AviationData.csv")
+df <- df[df['Aircraft.Category'] == 'Airplane',] # do not take helicopters into account
+head(df)
+```
+# First things first. Lets do some exploratory anslysis.
+
+### What types of events do we have in the dataset.
+```{r}
+tmp <- df %>% group_by(Investigation.Type) %>% count()
+tmp <- tmp[tmp$n > 1,]
+
+tmp %>%
+  ggplot(aes(x=Investigation.Type, y=n)) + 
+  geom_bar(stat="identity", width=.5, fill = "dark blue", alpha=.5) +
+  theme_fivethirtyeight() +
+  labs(
+    title = "Types of events by number",
+    caption = "https://www.kaggle.com/khsamaha/aviation-accident-database-synopses"
+  )
+```
+
+### Lets find out what does this actually mean:
+
+- **ACCIDENT** An occurrence associated with the operation of an aircraft which takes place between the time any person boards the aircraft with the intention of flight until such time as all such persons have disembarked, in which:
+  a) **a person is fatally or seriously injured** as a result of:
+    — being in the aircraft, or
+    — direct contact with any part of the aircraft, including parts which have become detached from the aircraft, or
+    — direct exposure to jet blast, except when the injuries are from natural causes, self-inflicted or inflicted by other persons, or when the injuries are to stowaways hiding outside the areas normally available to the passengers and crew.
+  b) **the aircraft sustains damage or structural failure** which:
+    — adversely affects the structural strength, performance or flight characteristics of the aircraft, and
+    — would normally require major repair or replacement of the affected component, except for engine failure or damage, when the damage is limited to the engine, its cowlings or accessories; or for damage limited to propellers, wing tips, antennas, tires, brakes, fairings, small dents or puncture holes in the aircraft skin.
+  c) **the aircraft is missing or is completely inaccessible**.
+
+- **INCIDENT** An occurrence, other than an accident, associated with the operation of an aircraft which affects or could affect the safety of operation.
+
+### Some info about flights (we will not consider the data that has less than .25% of total)
+```{r}
+drawBarChart <- function(data, column, title) {
+  one_persent = sum(data["n"]) / 100
+  data[data[column] != "",] %>% filter(n > sum(data["n"], na.rm = TRUE) / 400) %>% ggplot(aes_string(x=column, y="n")) +
+      geom_bar(stat="identity", width=.5, fill = "dark blue", alpha=.5) +
+      theme_fivethirtyeight() +
+      coord_flip() +
+      labs(
+        title = title,
+        caption = "https://www.kaggle.com/khsamaha/aviation-accident-database-synopses"
+      )
+}
+
+df %>% group_by(Aircraft.Damage) %>% count() %>% drawBarChart("Aircraft.Damage", "Aircraft damage")
+df %>% group_by(Engine.Type) %>% count() %>% drawBarChart("Engine.Type", "Engine type")
+df %>% group_by(Number.of.Engines) %>% count() %>% drawBarChart("Number.of.Engines", "Number of Engines")
+df %>% group_by(Broad.Phase.of.Flight) %>% count() %>% drawBarChart("Broad.Phase.of.Flight", "Broad Phase of Flight")
+```
+
+### Lets make some conclusions considering these data:
+- if aircraft got damage it is usually end up being substantially damaged or event destroyed.
+- big part of events happened to **reciprocating** engines that do not used in civil aviation.
+- significant part of events happened to aircrafts that has **only one** engine. No aircraft is allowed to be used in civil aviation with one engine. The only exception is AN-2 which has a biplan wing construction.
+- large amount of events broke out on the ground.
+
+### Lets see what airports should be considered the most dangourous (in absolute value)
+```{r}
+mostDengerousAirportsChart <- function(df) {
+  df2 <- select(copy(df), Airport.Code) %>% na.omit()
+  df2 <- df2 %>% group_by(Airport.Code) %>% count %>% arrange(desc(n)) %>% filter(Airport.Code != "" && Airport.Code != "NONE" && Airport.Code != "N/A" && Airport.Code != "None") %>% head(20)
+  df2 %>% ggplot(aes(x=reorder(Airport.Code, n), y=n)) +
+    geom_bar(stat = "identity", fill = "dark blue", alpha=0.4)+
+    coord_flip()+
+    theme_fivethirtyeight() +
+    labs(
+      title = "Most dangerous airports", ylab = "Airport code", xlab = "Number of events",
+      caption = "https://www.kaggle.com/khsamaha/aviation-accident-database-synopses"
+    )
+}
+
+mostDengerousAirportsChart(df)
+```
+
+### Lets see how many events happens in different states. As far as dataset contain mostly United States info, than we would be use only this data.
+
+Data preprocessing.
+We need two additional files:
+
+- Abriviation of US states to their actuial names.
+
+- Geojson with hex data for maps.
+```{r}
+eventsByState <- function(df) {
+  states <- read.csv("statelatlong.csv") %>% mutate(region = tolower(City))
+  df$Location = str_sub(df$Location,-2,-1)
+  df <- df[df$Country == "United States",] %>% 
+    group_by(Location) %>% 
+    count %>% 
+    arrange(desc(n)) %>% 
+    mutate(State = Location) %>% mutate(Count = n)
+  df$bin = cut(df$n, breaks=c(seq(1, 2000, 100), Inf), labels = c(
+    "0-100","100-200","200-300","300-400","400-500",
+    "500-600","600-700","700-800","800-900","900-1000",
+    "1000-1100","1100-1200","1200-1300","1300-1400","1400-1500",
+    "1500-1600","1600-1700","1700-1800","1800-1900","1900-2000"
+  ), include.lowest = TRUE)
+  total <- merge(df, states, by="State")
+  total <- total[, !(names(total) %in% c("Location","n", "City"))]
+  return (total)
+}
+
+hexBinMap <- function(geojson) {
+  spdf_fortified <- fortify(geojson, region = "google_name")
+  spdf_fortified$id = tolower(spdf_fortified$id)
+  return (spdf_fortified)
+}
+
+hexbin <- geojson_read("us_states_hexgrid.geojson",  what = "sp")
+centers <- cbind.data.frame(data.frame(gCentroid(hexbin, byid=TRUE), id=hexbin@data$iso3166_2))
+merged <- merge(hexBinMap(hexbin), eventsByState(copy(df)), by.x="id", by.y="region", all.x=TRUE)
+```
+Plotting.
+```{r}
+ggplot() +
+  geom_polygon(data = merged, aes(fill = bin, x = long, y = lat, group = group) , size=0, alpha=0.9) +
+  coord_map() +
+  theme_void() +
+  geom_text(data=centers, aes(x=x, y=y, label=id), color="black", size=3, alpha=0.6) +
+  scale_fill_manual(
+    values=rev(magma(20)),
+    name="Number of events",
+    guide = guide_legend(
+      keyheight = unit(3, units = "mm"),
+      keywidth = unit(12, units = "mm"),
+      label.position = "left", title.position = 'top'
+    )
+  ) +
+  labs(
+    title = "Aviation events in US from 1962 to 2018 by state",
+    caption = "Hexgrid: https://team.carto.com/u/andrew/tables/andrew.us_states_hexgrid/public/map \n State abbreviations: https://www.kaggle.com/washimahmed/usa-latlong-for-state-abbreviations"
+  ) +
+  theme(
+    text = element_text(color = "#22211d"),
+    plot.title = element_text(size= 22, hjust=-.4, color = "#4e4d47", margin = margin(b = -0.1, t = 0.4, l = 2, unit = "cm"))
+  )
+```
+
+As we can see, California, Texas, Florida, Alaska and Arizona are the most dengerous states to fly above.
+
+### Lets see what is the most deadful manufacturor and phase of flight.
+```{r}
+manufacturer <- df %>% drop_na(Total.Fatal.Injuries) %>% mutate(Make = tolower(Make)) %>% group_by(Make) %>% count() %>% arrange(desc(n)) %>% head(25)
+
+phase <- df %>% drop_na(Total.Fatal.Injuries) %>% group_by(Broad.Phase.of.Flight) %>% count() %>% filter(Broad.Phase.of.Flight != "") %>% arrange(desc(n))
+```
+Plotting.
+```{r}
+ggplot(phase, aes(x=Broad.Phase.of.Flight, y=n)) +
+  geom_segment(aes(x=Broad.Phase.of.Flight, xend=Broad.Phase.of.Flight, y=0, yend=n), color="grey") +
+  geom_point( color="orange", size=4) +
+  theme_fivethirtyeight() +
+  coord_flip() +
+  labs(title = "Total number of victims by flight phase")
+```
+
+As we can see, despite the fact that landing is the most dengerous part of flight, **the most victims emerged during the take off**.
+
+```{r}
+ggplot(manufacturer, aes(x=Make, y=n)) +
+  geom_segment(aes(x=Make, xend=Make, y=0, yend=n), color="grey") +
+  geom_point(color="dark blue", size=3) +
+  theme_fivethirtyeight() +
+  theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.major.x = element_blank()
+  ) +
+  coord_flip() +
+  geom_text(
+      data = data.frame(x = "cessna", y = 2261, label = '2261 - Absolute chempion in safety'),
+      aes(x = x, y = y, label = label),
+      inherit.aes = FALSE, nudge_y = -800, nudge_x = 2
+  ) +
+  geom_curve(data = data.frame(x = "cirrus", y = 2050, xend = "cessna", yend=2261),
+            aes(x = x, y = y, xend = xend, yend = yend),
+            curvature = -0.1,
+            arrow = arrow(angle = 20, length = unit(5, 'pt')),
+            inherit.aes = FALSE) +
+  geom_text(
+      data = data.frame(x = "piper", y = 1347, label = '1347'),
+      aes(x = x, y = y, label = label),
+      inherit.aes = FALSE, nudge_y = 0, nudge_x = 1
+  ) +
+  geom_text(
+      data = data.frame(x = "beech", y = 578, label = '578'),
+      aes(x = x, y = y, label = label),
+      inherit.aes = FALSE, nudge_y = 0, nudge_x = 1
+  ) +
+  labs(title = "Total number of victims by manufacturer")
+```
+
+"Cessna" is very popular aircraft manufactoror, but the gap is really significant.
+
+### Nevertheless aircraft is the safest transport in the world and we could see that number of events happend in civil aviation is so much lover than in private one. Such manufacturer as "Embraer", "Boeing" and "Airbus" are one of those that have low number of events and even lower number of fatal cases even though they are widely used.
+
+### In the end, there was no aircraft in the world that hasn't reached the ground. 
